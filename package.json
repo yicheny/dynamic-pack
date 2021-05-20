@@ -1,0 +1,23 @@
+{
+  "name": "dynamic-pack",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./bin/dynamic-pack"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "minimist": "^1.2.5"
+  },
+  "files": [
+    "lib",
+    "bin"
+  ],
+  "bin": {
+    "dynamic-pack": "./bin/dynamic-pack",
+    "dp": "./bin/dynamic-pack"
+  }
+}

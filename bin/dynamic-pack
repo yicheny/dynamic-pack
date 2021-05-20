@@ -1,0 +1,74 @@
+#!/usr/bin/env node
+
+'use strict';
+
+const argv = require('minimist')(process.argv.slice(2));
+const colors  = require('colors/safe');
+const path = require('path');
+const fs = require('fs')
+
+process.title ='dynamic-pack'
+
+const print = createPrint();
+const root = {};
+
+if(argv.h || argv.help) printHelpInfo();
+if(argv.v || argv.version) printVersion();
+if(argv.sourcefile) {
+    const rootPath = getWinPath(process.cwd());
+    const filePath = getWinPath(path.join(rootPath,argv.sourcefile));
+    // console.log('filePath',filePath);
+    tryExecute(()=>{
+        root.fileData = fs.readFileSync(filePath)
+        root.filePath = filePath;
+    });
+}
+if(argv.newfile){
+    if(!root.filePath) print.error('创建新文件必须输入源文件路径')
+    tryExecute(()=>fs.writeFileSync(argv.newfile,root.fileData));
+}
+
+function getWinPath(result){
+    return result.replace(/\\/g, '/');
+}
+
+function createPrint(){
+    return {
+        info(text){
+            console.log(text)
+        },
+        error(text){
+            console.log(colors.red(text))
+        }
+    }
+}
+
+function printHelpInfo(){
+    print.info(getHelpInfo());
+    process.exit();
+
+    function getHelpInfo(){
+        return [
+            'usage: dynamic-pack [path] [options]',
+            '',
+            'options',
+            '-h --help              打印这个列表并退出',
+            '-v --version           打印当前版本并退出',
+            '-s --sourcefile        指定源文件路径及名称',
+            '-n --newfile           指定新文件路径及名称',
+        ].join('\n');
+    }
+}
+
+function printVersion(){
+    print.info('v' + require('../package.json').version);
+    process.exit();
+}
+
+async function tryExecute(callback){
+    try {
+        return await callback();
+    } catch (err) {
+        print.error(err.message)
+    }
+}
