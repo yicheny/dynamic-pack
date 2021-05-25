@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node ./bin/dynamic-pack"
+    "start": "node ./bin/dynamic-pack",
+    "upload": "npm publish --registry http://registry.npmjs.org"
   },
-  "author": "",
+  "author": "ylf",
   "license": "ISC",
   "dependencies": {
     "colors": "^1.4.0",
