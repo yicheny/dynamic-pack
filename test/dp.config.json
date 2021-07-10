@@ -1,6 +1,8 @@
 {
   "classify": "ubs",
-  "afterScripts": [
+  "scripts": [
+    "dp -v",
+    "dp -h",
     "dp -v"
   ],
   "classifyConfig":{
