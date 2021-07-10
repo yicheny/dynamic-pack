@@ -1,0 +1,24 @@
+{
+  "classify": "ubs",
+  "classifyConfig":{
+    "ubs": {
+      "sourceFile": "./test/files/otherMain.js",
+      "targetFile": "./test/files/main.js",
+      "moduleConfig": [
+        {
+          "filePath": "./test/files/children/file.js",
+          "replaceModules": [
+            {
+              "source": "import C from './C';",
+              "target": "import C from './testC';"
+            },
+            {
+              "source": "import D from './D';",
+              "target": "import D from './testD';"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

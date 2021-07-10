@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node ./bin/dynamic-pack",
+    "start": "node ./bin/dynamic-pack --config=./test/dp.config.json",
     "upload": "npm publish --registry http://registry.npmjs.org"
   },
   "author": "ylf",
