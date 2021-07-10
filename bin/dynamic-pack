@@ -5,30 +5,20 @@
 const argv = require('minimist')(process.argv.slice(2));
 const colors  = require('colors/safe');
 const path = require('path');
-const fs = require('fs')
+const fs = require('fs');
+const {exec} = require('child_process');
+
+
 
 process.title ='dynamic-pack'
 
 const print = createPrint();
-const root = {};
 
 if(argv.h || argv.help) printHelpInfo();
 if(argv.v || argv.version) printVersion();
 if(argv.config) setByConfig();
 
-    // if(argv.sourcefile) {
-//     const rootPath = getWinPath(process.cwd());
-//     const filePath = getWinPath(path.join(rootPath,argv.sourcefile));
-//     // console.log('filePath',filePath);
-//     tryExecute(()=>{
-//         root.fileData = fs.readFileSync(filePath)
-//         root.filePath = filePath;
-//     });
-// }
-// if(argv.newfile){
-//     if(!root.filePath) print.error('创建新文件必须输入源文件路径')
-//     tryExecute(()=>fs.writeFileSync(argv.newfile,root.fileData));
-// }
+
 
 function printHelpInfo(){
     print.info(getHelpInfo());
@@ -56,7 +46,8 @@ function setByConfig(){
     const classify = config.classify;
     const classifyConfig = config.classifyConfig[classify];
     setMainPanel(classifyConfig);
-    setModule(classifyConfig.moduleConfig)
+    setModule(classifyConfig.moduleConfig);
+    exeScripts(config.afterScripts)
 
     function setMainPanel(config){
         const sourceFile = readFile(getAbsoluteFilePath(config.sourceFile));
@@ -74,8 +65,12 @@ function setByConfig(){
             fs.writeFileSync(filePath,file)
         })
     }
-}
 
+    function exeScripts(scripts){
+        if(!Array.isArray(scripts)) return null;
+        scripts.forEach((s)=>exec_order(s));
+    }
+}
 
 
 
@@ -94,14 +89,6 @@ function getWinPath(result){
     return result.replace(/\\/g, '/');
 }
 
-async function tryExecute(callback){
-    try {
-        return await callback();
-    } catch (err) {
-        print.error(err.message)
-    }
-}
-
 function createPrint(){
     return {
         info(text){
@@ -111,4 +98,25 @@ function createPrint(){
             console.log(colors.red(text))
         }
     }
+}
+
+function exec_order(order, info = '') {
+    let i = 1;
+    const timeId = setInterval(() => {
+        console.log(info, i++);
+    }, 1000);
+
+    return new Promise((resolve, reject) => {
+        exec(order, (err, stdout, stderr) => {
+            if (err) return reject(err);
+            return resolve(stdout, stderr);
+        });
+    }).then((stdout, stderr) => {
+        console.log('stdout', stdout);
+        // console.log('stderr',stderr);
+        clearInterval(timeId)
+    }).catch(err => {
+        console.log('err', err);
+        clearInterval(timeId)
+    });
 }
