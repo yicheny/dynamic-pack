@@ -1,6 +1,6 @@
 {
   "name": "dynamic-pack",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -19,7 +19,7 @@
     "bin"
   ],
   "bin": {
-    "dynamic-pack": "./bin/dynamic-pack",
-    "dp": "./bin/dynamic-pack"
+    "dynamic-pack": "bin/dynamic-pack",
+    "dp": "bin/dynamic-pack"
   }
 }
