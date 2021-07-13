@@ -36,8 +36,7 @@ class DpError {
     }
 
     getOutTime() {
-        const date = new Date();
-        return `Log output time：${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate() + 1} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}\n`
+        return `Log output time：${getNowFmt()}\n`
     }
 
     createLog() {
@@ -105,7 +104,7 @@ async function setByConfig() {
         const config = require(absoluteConfigPath);
         dpError.setPath(getResolveName(config.errorLogPath))
         const isRecovery = config.isRecovery;
-        const classify = config.classify;
+        const classify = getClassify();
         const classifyConfig = config.classifyConfig[classify];
         const moduleConfig = classifyConfig.moduleConfig;
 
@@ -118,12 +117,27 @@ async function setByConfig() {
             print.success('MainPanel successfully processed!');
             replaceModule();
             print.success('Special module successfully processed!');
+            createPackInfo()
+            print.success('Successfully created PackInfo file!');
 
             function setMainPanel() {
                 if(panelPathNotExist(classifyConfig)) return null;
                 const sourceFile = readFile(getResolveName(classifyConfig.sourceFile));
                 if (isRecovery) originalMainPanel = readFile(getResolveName(classifyConfig.targetFile));
                 writeTargetPanel(sourceFile);
+            }
+
+            function createPackInfo(){
+                const packDir = config.packInfoDir || './';
+                const packName = config.packInfoName || 'packInfo.json';
+                const packPath = `${packDir}${packName}`
+                const info = `
+                    {
+                        "classify":"${classify}",
+                        "updateTime":"${getNowFmt()}"
+                    }
+                `
+                fs.writeFileSync(getResolveName(packPath),info)
             }
         }
 
@@ -166,6 +180,10 @@ async function setByConfig() {
         function panelPathNotExist(){
             if(isNil(classifyConfig.sourceFile)) return true;
             if(isNil(classifyConfig.targetFile)) return true;
+        }
+
+        function getClassify(){
+            return argv.c || argv.classify
         }
     })
 }
@@ -256,4 +274,13 @@ async function tryExecute(callback,errorCB,finallyCB) {
 
 function isNil(x){
     return x===undefined || x===null
+}
+
+function getNowFmt(){
+    const date = new Date();
+    return `${date.getFullYear()}-${add0(date.getMonth() + 1)}-${add0(date.getDate() + 1)} ${add0(date.getHours())}:${add0(date.getMinutes())}:${add0(date.getSeconds())}`
+
+    function add0(v){
+        return v<10 ? `0${v}` : v;
+    }
 }

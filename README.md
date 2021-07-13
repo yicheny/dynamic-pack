@@ -81,8 +81,11 @@
     
 # 运行生命周期
 1. 根据`classifyConfig[classify]`进行核心处理
-2. 自定义脚本执行
-3. 执行还原指令
+   1. 替换`MainPanel`
+   1. 替换功能模块
+   1. 生成`packInfo.json`文件，包含`classify`和`updateTime`
+1. 自定义脚本执行
+1. 执行还原指令
 
 # 错误日志
 错误日志仅在发生错误时生成。错误日志的名称是`dp_error_log_`加上当前格林威治时间数值，比如：`dp_error_log_1626141795237.txt`
