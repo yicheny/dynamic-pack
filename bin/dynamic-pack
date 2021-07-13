@@ -120,6 +120,7 @@ async function setByConfig() {
             print.success('Special module successfully processed!');
 
             function setMainPanel() {
+                if(panelPathNotExist(classifyConfig)) return null;
                 const sourceFile = readFile(getResolveName(classifyConfig.sourceFile));
                 if (isRecovery) originalMainPanel = readFile(getResolveName(classifyConfig.targetFile));
                 writeTargetPanel(sourceFile);
@@ -136,7 +137,7 @@ async function setByConfig() {
         }
 
         function recovery() {
-            writeTargetPanel(originalMainPanel);
+            if(!panelPathNotExist()) writeTargetPanel(originalMainPanel);
             replaceModule('target', 'source');
             print.success('Successfully restored to the initial state!');
         }
@@ -160,6 +161,11 @@ async function setByConfig() {
 
         function getResolveName(file){
             return getWinPath(path.resolve(dirName,file));
+        }
+
+        function panelPathNotExist(){
+            if(isNil(classifyConfig.sourceFile)) return true;
+            if(isNil(classifyConfig.targetFile)) return true;
         }
     })
 }
@@ -246,4 +252,8 @@ async function tryExecute(callback,errorCB,finallyCB) {
     async function exe(fn){
         if (typeof fn === 'function') return await fn();
     }
+}
+
+function isNil(x){
+    return x===undefined || x===null
 }
