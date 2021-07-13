@@ -1,17 +1,23 @@
 {
   "classify": "ubs",
+  "isRecovery": true,
   "scripts": [
+
+  ],
+  "noneScripts": [
     "dp -v",
     "dp -h",
-    "dp -v"
+    "dp --test",
+    "mockDp --test"
   ],
+  "errorLogPath": "./",
   "classifyConfig":{
     "ubs": {
-      "sourceFile": "./test/files/otherMain.js",
-      "targetFile": "./test/files/main.js",
+      "sourceFile": "./files/otherMain.js",
+      "targetFile": "./files/main.js",
       "moduleConfig": [
         {
-          "filePath": "./test/files/children/file.js",
+          "filePath": "./files/children/file.js",
           "replaceModules": [
             {
               "source": "import C from './C';",
