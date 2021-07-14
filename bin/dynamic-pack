@@ -183,7 +183,7 @@ async function setByConfig() {
         }
 
         function getClassify(){
-            return argv.c || argv.classify
+            return argv.classify
         }
     })
 }
