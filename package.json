@@ -7,7 +7,7 @@
     "start": "node ./bin/dynamic-pack --config=./test/dp.config.json",
     "start-ubs": "node ./bin/dynamic-pack --config=./test/dp.config.json --classify=ubs",
     "start-zs": "node ./bin/dynamic-pack --config=./test/dp.config.json --classify=zs",
-    "upload": "npm publish --registry http://registry.npmjs.org"
+    "upload": "npm publish --registry=http://nexus.croot.com:8081/repository/npm-hosted/"
   },
   "author": "ylf",
   "license": "ISC",
