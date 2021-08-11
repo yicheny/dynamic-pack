@@ -56,17 +56,35 @@ class DpError {
     }
 }
 
+const GLOBAL_KEYS = Object.freeze({
+    packInfo:"packInfo"
+})
+class GlobalData {
+    constructor() {
+        this.data = new Map();
+    }
+
+    setData(key,value){
+        this.data.set(key,value);
+    }
+
+    getData(key){
+        return this.data.get(key);
+    }
+}
 
 process.title = 'dynamic-pack'
 
 const print = createPrint();
 const dpError = new DpError();
+const globalData = new GlobalData();
 
 tryExecute(
     () => {
         if (argv.h || argv.help) return printHelpInfo();
         if (argv.v || argv.version) return printVersion();
         if (argv.c || argv.config) return setByConfig();
+        if (argv.read) return runRead();
         print.info("It is not a command provided by dynamic-pack, you can execute dp -h to view the currently supported commands!");
         process.exit();
     },
@@ -98,7 +116,7 @@ function printVersion() {
 async function setByConfig() {
     await tryExecute(async () => {
         let originalMainPanel = null;
-        const absoluteConfigPath = getAbsoluteFilePath(argv.c || argv.config);
+        const absoluteConfigPath = getAbsoluteFilePath(getConfigPath());
         const dirName = path.dirname(absoluteConfigPath);
         const config = require(absoluteConfigPath);
         dpError.setPath(getResolveName(config.errorLogPath))
@@ -110,6 +128,12 @@ async function setByConfig() {
         dynamic()
         await exeScripts(config.scripts);
         if (isRecovery) recovery();
+
+        function getConfigPath(){
+            const c = argv.c || argv.config;
+            if(c === true) return './dp.config.json';
+            return c;
+        }
 
         function dynamic() {
             setMainPanel();
@@ -129,14 +153,18 @@ async function setByConfig() {
             function createPackInfo(){
                 const packDir = config.packInfoDir || './';
                 const packName = config.packInfoName || 'packInfo.json';
-                const packPath = `${packDir}${packName}`
+                const packPath = getResolveName(`${packDir}${packName}`);
+                globalData.setData(GLOBAL_KEYS.packInfo,{
+                    packPath,
+                    packInfo:readFile(packPath)
+                })
                 const info = `
                     {
                         "classify":"${classify}",
                         "updateTime":"${getNowFmt()}"
                     }
                 `
-                fs.writeFileSync(getResolveName(packPath),info)
+                fs.writeFileSync(packPath,info)
             }
         }
 
@@ -152,6 +180,9 @@ async function setByConfig() {
         function recovery() {
             if(!panelPathNotExist()) writeTargetPanel(originalMainPanel);
             replaceModule('target', 'source');
+            const {packInfo,packPath} = globalData.getData(GLOBAL_KEYS.packInfo);
+            fs.writeFileSync(packPath,packInfo);
+
             print.success('Successfully restored to the initial state!');
         }
 
@@ -187,6 +218,11 @@ async function setByConfig() {
     })
 }
 
+function runRead(){
+    const readPath = argv.read;
+    const fileInfo = readFile(getAbsoluteFilePath(readPath));
+    print.success('dp read file information:',fileInfo)
+}
 
 //基础方法
 function readFile(path) {
