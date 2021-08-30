@@ -85,6 +85,7 @@ tryExecute(
         if (argv.v || argv.version) return printVersion();
         if (argv.c || argv.config) return setByConfig();
         if (argv.read) return runRead();
+        if (argv.time) return runTime();
         print.info("It is not a command provided by dynamic-pack, you can execute dp -h to view the currently supported commands!");
         process.exit();
     },
@@ -103,7 +104,7 @@ function printHelpInfo() {
             'options',
             '-h --help              Print this list and exit',
             '-v --version           Print the current version and exit',
-            '-c --config            Configuration file path'
+            '-c --config            Configuration file path',
         ].join('\n');
     }
 }
@@ -172,8 +173,16 @@ async function setByConfig() {
             const hasScripts = Array.isArray(scripts) && (scripts.length > 0);
             if (!hasScripts) return null;
             print.primary("\nExecute custom scripts!\n");
-            const orderList = scripts.map((s) => exec_order(s));
-            await Promise.all(orderList);
+
+            //串行
+            for(const s of scripts){
+                await exec_order(s);
+            }
+
+            //并行
+            // const orderList = scripts.map((s) => exec_order(s));
+            // await Promise.all(orderList);
+
             print.success("Custom scripts executed successfully!\n")
         }
 
@@ -216,6 +225,16 @@ async function setByConfig() {
             return argv.classify
         }
     })
+}
+
+function runTime(){
+    const time = argv.time;
+    return new Promise((resolve)=>{
+        const timeId = setTimeout(()=>{
+            resolve(`dp time=${time} current=${getNowFmt()}`);
+            clearTimeout(timeId)
+        },time*1000)
+    },[])
 }
 
 function runRead(){

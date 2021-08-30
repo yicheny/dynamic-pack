@@ -1,10 +1,27 @@
 [TOC]
 
+# 文档版本
+2.1.5
+
+# 2.0特性
+- **文件配置** 原来由命令行参数输入的部分，改为由`dp.config.json`进行配置
+
 # 支持的命令参数
-目前只支持以下三种命令：
+目前支持以下三种命令：
 - `-h --help` 输出帮助列表
 - `-v --version` 输出当前`dynamic-pack`版本
-- `-c --config` 读取配置执行脚本，2.0版本核心功能，下面会详细介绍
+- `-c --config` 读取配置执行脚本，下面会详细介绍，默认为`./dp.config.json`
+
+# 使用
+可以直接作为命令行执行，不过推荐放到`package.json`作为打包指令：
+```json5
+//package.json
+{
+    scripts:{
+        "build-csfs": "dp --classify=csfs" //classify用于指定dp.config.json中的配置项
+    }
+}
+```
 
 # `-c --config`
 配置示例，例如`dp.config.json`:
@@ -44,9 +61,6 @@
 }
 ```
 
-## `classify` 
-用于指定`classifyConfig`的配置项
-
 ## `isRecovery`
 指定脚本执行完成后是否将文件还原至初始状态
 
@@ -54,7 +68,10 @@
 
 ## `scripts`
 配置自定义执行脚本，脚本执行时机在核心处理之后，还原处理之前。
-> 如果不设置`scripts`，或`scripts`设置为空则不会执行
+
+注意事项：
+- 如果不设置`scripts`，或`scripts`设置为空则不会执行
+- 目前`scripts`只支持串行执行【同步模式】
 
 ## `errorLogPath`
 错误日志生成路径，如果不配置则默认是`./`，即`dp.config.json`所在目录
