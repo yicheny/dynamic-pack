@@ -2,82 +2,24 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const colors = require('colors/safe');
 const path = require('path');
 const fs = require('fs');
-const {exec} = require('child_process');
-const iconv = require('iconv-lite');
+const DPError = require('../lib/DPError');
+const GlobalData = require('../lib/GlobalData');
+const createPrint = require('../lib/createPrint');
+const {isNil,getNowFmt} = require('../lib/utils');
+const createExecOrder = require('../lib/createExecOrder');
+const {readFile, getAbsoluteFilePath, getWinPath} = require('../lib/pathEnhance')
 
-class DpError {
-    constructor() {
-        this._value = [];
-        this._path = './';
-        this._hasError = null;
-    }
-
-    setHasError(value){
-        this._hasError = value;
-    }
-
-    get value() {
-        return this._value;
-    }
-
-    setPath(value) {
-        if(typeof value !== 'string') return null;
-        this._path = value;
-    }
-
-    output() {
-        this.transformError();
-        this.value.unshift(this.getOutTime())
-        return this.value.join('\n');
-    }
-
-    getOutTime() {
-        return `Log output time：${getNowFmt()}\n`
-    }
-
-    createLog() {
-        if(!this._hasError) return null;
-        const logName = `dp_error_log_${(new Date()).getTime()}.txt`;
-        fs.writeFileSync(`${this._path}/${logName}`, dpError.output());
-        process.exit();
-    }
-
-    transformError(){
-        this._value = this.value.map((error)=>{
-            if(error instanceof Error) {
-                return error.stack;
-                // return JSON.stringify(error, Object.getOwnPropertyNames(error));
-            }
-            return error;
-        },)
-    }
-}
+process.title = 'dynamic-pack'
 
 const GLOBAL_KEYS = Object.freeze({
     packInfo:"packInfo"
 })
-class GlobalData {
-    constructor() {
-        this.data = new Map();
-    }
-
-    setData(key,value){
-        this.data.set(key,value);
-    }
-
-    getData(key){
-        return this.data.get(key);
-    }
-}
-
-process.title = 'dynamic-pack'
-
-const print = createPrint();
-const dpError = new DpError();
+const dpError = new DPError();
+const print = createPrint(dpError);
 const globalData = new GlobalData();
+const execOrder = createExecOrder(print);
 
 tryExecute(
     () => {
@@ -157,15 +99,18 @@ async function setByConfig() {
                 const packPath = getResolveName(`${packDir}${packName}`);
                 globalData.setData(GLOBAL_KEYS.packInfo,{
                     packPath,
-                    packInfo:readFile(packPath)
+                    packInfo:getPackInfo(packPath)
                 })
-                const info = `
-                    {
-                        "classify":"${classify}",
-                        "updateTime":"${getNowFmt()}"
-                    }
-                `
-                fs.writeFileSync(packPath,info)
+                const info = {
+                    "classify":classify,
+                    "updateTime":getNowFmt()
+                }
+                fs.writeFileSync(packPath,JSON.stringify(info))
+
+                function getPackInfo(filePath){
+                    if(fs.existsSync(filePath)) return readFile(filePath);
+                    return '';
+                }
             }
         }
 
@@ -176,11 +121,11 @@ async function setByConfig() {
 
             //串行
             for(const s of scripts){
-                await exec_order(s);
+                await execOrder(s);
             }
 
             //并行
-            // const orderList = scripts.map((s) => exec_order(s));
+            // const orderList = scripts.map((s) => execOrder(s));
             // await Promise.all(orderList);
 
             print.success("Custom scripts executed successfully!\n")
@@ -244,73 +189,6 @@ function runRead(){
 }
 
 //基础方法
-function readFile(path) {
-    return fs.readFileSync(path, 'utf-8');
-}
-
-function getAbsoluteFilePath(filePath) {
-    const rootPath = getWinPath(process.cwd());
-    return getWinPath(path.join(rootPath, filePath));
-}
-
-function getWinPath(result) {
-    return result.replace(/\\/g, '/');
-}
-
-function createPrint() {
-    return {
-        info(...text) {
-            dpError.value.push(text);
-            console.log(...text)
-        },
-        primary(coreInfo, ...normalInfo) {
-            dpError.value.push(coreInfo, ...normalInfo);
-            console.log(colors.blue(coreInfo), ...normalInfo);
-        },
-        error(coreInfo, ...normalInfo) {
-            dpError.setHasError(true);
-            dpError.value.push(coreInfo, ...normalInfo);
-            console.log(colors.red(coreInfo), ...normalInfo)
-        },
-        success(coreInfo, ...normalInfo) {
-            dpError.value.push(coreInfo, ...normalInfo);
-            console.log(colors.green(coreInfo), ...normalInfo)
-        }
-    }
-}
-
-const MAX_EXEC_TIME = 600;//秒
-function exec_order(order, info) {
-    info = info || `${order} 执行中：`;
-
-    let i = 1;
-    const timeId = setInterval(() => {
-        if(i>=MAX_EXEC_TIME) {
-            print.error(`${order} The execution time is too long, end the task!`);
-            return clearInterval(timeId);
-        }
-        info && console.log(info, i++);
-    }, 1000);
-
-    return new Promise((resolve, reject) => {
-        exec(order,{ encoding:'binary' }, (err, stdout, stderr) => {
-            if (err) return reject(err);
-            return resolve(stdout, stderr);
-        });
-    }).then((stdout, stderr) => {
-        print.primary(`${order} stdout：\n`, decode(stdout));
-        clearInterval(timeId)
-    }).catch(err => {
-        print.error(`${order} error：\n`, decode(err.stack.concat("\n")));
-        clearInterval(timeId)
-    });
-}
-
-function decode(str = '',encode='cp936') {
-    const buf = Buffer.from(str, 'binary');
-    return iconv.decode(buf, encode);
-}
-
 async function tryExecute(callback,errorCB,finallyCB) {
     try {
         await exe(callback);
@@ -323,18 +201,5 @@ async function tryExecute(callback,errorCB,finallyCB) {
 
     async function exe(fn){
         if (typeof fn === 'function') return await fn();
-    }
-}
-
-function isNil(x){
-    return x===undefined || x===null
-}
-
-function getNowFmt(){
-    const date = new Date();
-    return `${date.getFullYear()}-${add0(date.getMonth() + 1)}-${add0(date.getDate() + 1)} ${add0(date.getHours())}:${add0(date.getMinutes())}:${add0(date.getSeconds())}`
-
-    function add0(v){
-        return v<10 ? `0${v}` : v;
     }
 }

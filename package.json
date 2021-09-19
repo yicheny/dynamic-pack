@@ -7,7 +7,7 @@
     "start": "node ./bin/dynamic-pack --config=./test/dp.config.json",
     "start-ubs": "node ./bin/dynamic-pack --config=./test/dp.config.json --classify=ubs",
     "start-zs": "node ./bin/dynamic-pack --config=./test/dp.config.json --classify=zs",
-    "test:read": "dp --read=./test/packInfo.json",
+    "test:read": "dp --read=./test/dp.config.json",
     "upload": "npm publish --registry=http://nexus.croot.com:8081/repository/npm-hosted/",
     "publish:patch": "npm version patch && npm publish",
     "publish:minor": "npm version minor && npm publish",
