@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
 const path = require('path');
 const fs = require('fs');
 const DPError = require('../lib/DPError');
@@ -10,6 +9,7 @@ const createPrint = require('../lib/createPrint');
 const {isNil,getNowFmt} = require('../lib/utils');
 const createExecOrder = require('../lib/createExecOrder');
 const {readFile, getAbsoluteFilePath, getWinPath} = require('../lib/pathEnhance')
+const createDPOptions = require('../lib/createDPOptions');
 
 process.title = 'dynamic-pack'
 
@@ -21,34 +21,24 @@ const print = createPrint(dpError);
 const globalData = new GlobalData();
 const execOrder = createExecOrder(print);
 
+const DPOptions = createDPOptions();
+const argv = DPOptions.parse(process.argv);
+
 tryExecute(
     () => {
-        if (argv.h || argv.help) return printHelpInfo();
-        if (argv.v || argv.version) return printVersion();
-        if (argv.c || argv.config) return setByConfig();
+        if (argv.help) return printHelpInfo(DPOptions);
+        if (argv.version) return printVersion();
+        if (argv.config) return setByConfig();
         if (argv.read) return runRead();
         if (argv.time) return runTime();
-        print.info("It is not a command provided by dynamic-pack, you can execute dp -h to view the currently supported commands!");
-        process.exit();
     },
     null,
     ()=>dpError.createLog())
 
 
-function printHelpInfo() {
-    print.info(getHelpInfo());
+function printHelpInfo(DPOptions) {
+    print.info(DPOptions.generateHelp())
     process.exit();
-
-    function getHelpInfo() {
-        return [
-            'usage: dynamic-pack [path] [options]',
-            '',
-            'options',
-            '-h --help              Print this list and exit',
-            '-v --version           Print the current version and exit',
-            '-c --config            Configuration file path',
-        ].join('\n');
-    }
 }
 
 function printVersion() {

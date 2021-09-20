@@ -4,10 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node ./bin/dynamic-pack --config=./test/dp.config.json",
-    "start-ubs": "node ./bin/dynamic-pack --config=./test/dp.config.json --classify=ubs",
-    "start-zs": "node ./bin/dynamic-pack --config=./test/dp.config.json --classify=zs",
-    "test:read": "dp --read=./test/dp.config.json",
+    "run config": "node ./bin/dynamic-pack --config=./test/dp.config.json",
+    "run config-ubs": "node ./bin/dynamic-pack --config=./test/dp.config.json --classify=ubs",
+    "run config-zs": "node ./bin/dynamic-pack --config=./test/dp.config.json --classify=zs",
+    "run read": "dp --read=./test/dp.config.json",
+    "run time": "dp --time=5",
+    "run help": "dp --help",
+    "run version": "dp -v",
+    "run noMatch": "dp -xxx",
     "upload": "npm publish --registry=http://nexus.croot.com:8081/repository/npm-hosted/",
     "publish:patch": "npm version patch && npm publish",
     "publish:minor": "npm version minor && npm publish",
@@ -18,7 +22,7 @@
   "dependencies": {
     "colors": "^1.4.0",
     "iconv-lite": "^0.6.3",
-    "minimist": "^1.2.5"
+    "optionator": "^0.9.1"
   },
   "files": [
     "lib",
