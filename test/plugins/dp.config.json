@@ -1,0 +1,19 @@
+{
+  "isRecovery": true,
+  "scripts": [
+    "dp --time=5",
+    "dp --time=4"
+  ],
+  "noneScripts": [
+    "dp --read=./test/packInfo.json",
+    "dp -v",
+    "dp -h",
+    "dp --test",
+    "mockDp --test"
+  ],
+  "errorLogPath": "./",
+  "plugins": [
+    "ubs",
+    "zs"
+  ]
+}
