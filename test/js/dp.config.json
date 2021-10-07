@@ -11,9 +11,5 @@
     "dp --test",
     "mockDp --test"
   ],
-  "errorLogPath": "./",
-  "plugins": [
-    "ubs",
-    "zs"
-  ]
+  "errorLogPath": "./"
 }

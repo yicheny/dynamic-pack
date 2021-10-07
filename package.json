@@ -13,6 +13,7 @@
     "run config-ubs": "node ./bin/dynamic-pack --config=./test/dp.config.json --classify=ubs",
     "run config-zs": "node ./bin/dynamic-pack --config=./test/dp.config.json --classify=zs",
     "run config-error": "node ./bin/dynamic-pack --config=./test/dp.config.json",
+    "runJs config-ubs": "node ./bin/dynamic-pack --config=./test/js/dp.config.ubs.js",
     "upload": "npm publish --registry=http://nexus.croot.com:8081/repository/npm-hosted/",
     "publish:patch": "npm version patch && npm publish",
     "publish:minor": "npm version minor && npm publish",
@@ -23,6 +24,7 @@
   "dependencies": {
     "colors": "^1.4.0",
     "iconv-lite": "^0.6.3",
+    "import-fresh": "^3.3.0",
     "optionator": "^0.9.1"
   },
   "files": [
