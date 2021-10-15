@@ -15,9 +15,9 @@
     "run config-error": "node ./bin/dynamic-pack --config=./test/dp.config.json",
     "runJs config-ubs": "node ./bin/dynamic-pack --config=./test/js/dp.config.ubs.js",
     "upload": "npm publish --registry=http://nexus.croot.com:8081/repository/npm-hosted/",
-    "publish:patch": "npm version patch && npm publish",
-    "publish:minor": "npm version minor && npm publish",
-    "publish:major": "npm version major && npm publish"
+    "publish:patch": "npm version patch && npm run upload",
+    "publish:minor": "npm version minor && npm run upload",
+    "publish:major": "npm version major && npm run upload"
   },
   "author": "ylf",
   "license": "ISC",
