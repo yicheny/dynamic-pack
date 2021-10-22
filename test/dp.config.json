@@ -1,5 +1,5 @@
 {
-  "isRecovery": true,
+  "isRecovery": false,
   "scripts": [
     "dp --time=5",
     "dp --time=4"
